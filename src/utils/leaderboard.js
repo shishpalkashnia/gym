@@ -9,16 +9,17 @@ export async function fetchLeaderboardStats(gymId) {
   const sevenDaysAgoStr = sevenDaysAgo.toISOString()
 
   // 1. CONSISTENCY
-  const { data: recentWorkouts } = await supabase
+  const { data: recentWorkouts, error: consError } = await supabase
     .from('workouts')
     .select('member_id, created_at, members(name)')
     .eq('gym_id', gymId)
     .gte('created_at', sevenDaysAgoStr)
 
+  if (consError) console.error('Leaderboard consistency query error:', consError)
+
   let consistencyMap = {}
   if (recentWorkouts) {
     recentWorkouts.forEach(w => {
-      // Workarounds for supabase nesting single vs array
       const memberName = Array.isArray(w.members) ? w.members[0]?.name : w.members?.name;
       if (!memberName) return;
       
@@ -34,7 +35,7 @@ export async function fetchLeaderboardStats(gymId) {
   }
 
   const allConsistency = Object.values(consistencyMap).sort((a, b) => b.count - a.count)
-  const consistencyLeaderboard = allConsistency.filter(m => m.count >= 2).slice(0, 10)
+  const consistencyLeaderboard = allConsistency.filter(m => m.count >= 1).slice(0, 10)
 
   // 2. STRENGTH
   const { data: strengthEntries } = await supabase
