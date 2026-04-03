@@ -113,16 +113,33 @@ export default function PublicWorkoutLog() {
 
   const handleIdentify = async (e) => {
     e.preventDefault()
-    if (!phone.replace(/[^\d+]/g, '')) return
+    const cleanPhone = phone.replace(/[^\d]/g, '')  // Strip everything except digits
+    if (!cleanPhone) return
     
     setLoading(true)
     
-    const { data: matchedMembers } = await supabase
+    // Try exact match first, then suffix match (handles +91 prefix differences)
+    let matchedMembers = null
+    const { data: exactMatch } = await supabase
       .from('members')
       .select('id, name')
       .eq('gym_id', gymId)
-      .eq('phone', phone)
+      .eq('phone', cleanPhone)
       .limit(1)
+    
+    if (exactMatch && exactMatch.length > 0) {
+      matchedMembers = exactMatch
+    } else {
+      // Fallback: match last 10 digits using ilike suffix
+      const last10 = cleanPhone.slice(-10)
+      const { data: fuzzyMatch } = await supabase
+        .from('members')
+        .select('id, name')
+        .eq('gym_id', gymId)
+        .ilike('phone', `%${last10}`)
+        .limit(1)
+      matchedMembers = fuzzyMatch
+    }
 
     let isGuest = true
     let memberId = null
