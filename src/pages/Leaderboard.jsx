@@ -6,7 +6,7 @@ import { fetchLeaderboardStats, STRENGTH_EXERCISES } from '../utils/leaderboard'
 export default function Leaderboard() {
   const { activeGym } = useGym()
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('consistency') // 'consistency', 'strength', 'cardio'
+  const [activeTab, setActiveTab] = useState('strength') // 'strength', 'consistency', 'cardio'
   const [leaderboards, setLeaderboards] = useState(null)
 
   useEffect(() => {
@@ -40,18 +40,18 @@ export default function Leaderboard() {
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
         <button 
-          className={`btn ${activeTab === 'consistency' ? 'btn-primary' : ''}`}
-          onClick={() => setActiveTab('consistency')}
-          style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
-        >
-          <Flame size={18} /> Consistency
-        </button>
-        <button 
           className={`btn ${activeTab === 'strength' ? 'btn-primary' : ''}`}
           onClick={() => setActiveTab('strength')}
           style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
         >
           <Dumbbell size={18} /> Strength
+        </button>
+        <button 
+          className={`btn ${activeTab === 'consistency' ? 'btn-primary' : ''}`}
+          onClick={() => setActiveTab('consistency')}
+          style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
+        >
+          <Flame size={18} /> Consistency
         </button>
         <button 
           className={`btn ${activeTab === 'cardio' ? 'btn-primary' : ''}`}
